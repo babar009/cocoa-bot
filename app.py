@@ -3,7 +3,7 @@ from twilio.twiml.messaging_response import  MessagingResponse
 from pymongo import MongoClient
 from datetime import datetime
 
-cluster = MongoClient("mongodb+srv://Babar:babar@cocoabakebot.n8zdbxb.mongodb.net/?retryWrites=true&w=majority")
+cluster = MongoClient("mongodb+srv://Babar:babar@cocoabakebot.n8zdbxb.mongodb.net/?retryWrites=true&w=majority&appName=CocoaBakeBot")
 
 db = cluster["CocoaBakeBot"]
 users = db["users"]
@@ -12,10 +12,16 @@ orders = db["orders"]
 app = Flask(__name__)
 
 
-@app.route("/", methods=["get", "post"])
+@app.route("/")
+def home():
+    return "✅ CocoaBake WhatsApp Bot is running successfully on Heroku!"
+
+@app.route("/reply", methods=["POST"])
 def reply():
     text = request.form.get("Body")
     number = request.form.get("From")
+    if not number:
+        return "No WhatsApp data received", 400
     number = number.replace("whatsapp:","")
     res = MessagingResponse()
     user = users.find_one({"number":number})
