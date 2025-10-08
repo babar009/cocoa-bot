@@ -14,14 +14,14 @@ def home():
     return "✅ CocoaBake WhatsApp Bot is running."
 
 @app.route("/reply", methods=["POST"])
+@app.route("/reply", methods=["POST"])
 def reply():
-    # WhatAuto sends data as JSON or form-data
-    data = request.get_json() or request.form
-    text = data.get("message") or ""
-    number = data.get("sender") or ""
-
+    # For WhatAuto
+    text = request.form.get("message") or request.json.get("message")
+    number = request.form.get("sender") or request.json.get("sender")
+    
     if not number:
-        return jsonify({"reply": "Error: No sender data received."}), 400
+        return "No WhatsApp data received", 400
 
     user = users.find_one({"number": number})
 
