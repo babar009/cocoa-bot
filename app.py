@@ -11,7 +11,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "✅ CocoaBake WhatsApp Bot is running successfully!"
+    return "✅ CocoaBake WhatsApp Bot is running."
 
 @app.route("/reply", methods=["POST"])
 def reply():
