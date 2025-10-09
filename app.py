@@ -125,48 +125,48 @@ def reply():
         else:
             reply = "Please Enter a *Valid Number*"
 
-    elif user["status"] == "ordering":
-        try:
-            option = int(text)
-        except:
-            return jsonify({"reply": "Please enter a valid response."})
-
-        if option == 0:
-            users.update_one({"number": number}, {"$set": {"status": "main"}})
-            reply = (
-                "You can choose from one of the options below:\n\n"
-                "1️⃣ To *contact* us\n"
-                "2️⃣ To *order* snacks\n"
-                "3️⃣ To know our *working hours*\n"
-                "4️⃣ To get our *address*"
-            )
-        elif 1 <= option <= 9:
-            cakes = [
-                "Red Velvet Cake", "Dark Forest Cake", "Ice Cream Cake",
-                "Plum Cake", "Sponge Cake", "Genoise Cake",
-                "Angel Cake", "Carrot Cake", "Fruit Cake"
-            ]
-            selected = cakes[option - 1]
-            users.update_one(
-                {"number": number},
-                {"$set": {"status": "address", "item": selected}}
-            )
-            reply = f"Excellent choice 😉\nPlease enter your address to confirm the order for *{selected}*."
-        else:
-            reply = "Please enter a valid response."
-    elif user["status"] == "address":
-        selected = user.get("item", "Cake")
-        orders.insert_one({
-            "number": number,
-            "item": selected,
-            "address": text,
-            "order_time": datetime.now()
-        })
-        users.update_one({"number": number}, {"$set": {"status": "ordered"}})
-        reply = (
-            f"Thanks for shopping with us 😊\nYour order for *{selected}* "
-            "has been received and will be delivered within an hour."
-        )
+    # elif user["status"] == "ordering":
+    #     try:
+    #         option = int(text)
+    #     except:
+    #         return jsonify({"reply": "Please enter a valid response."})
+    #
+    #     if option == 0:
+    #         users.update_one({"number": number}, {"$set": {"status": "main"}})
+    #         reply = (
+    #             "You can choose from one of the options below:\n\n"
+    #             "1️⃣ To *contact* us\n"
+    #             "2️⃣ To *order* snacks\n"
+    #             "3️⃣ To know our *working hours*\n"
+    #             "4️⃣ To get our *address*"
+    #         )
+    #     elif 1 <= option <= 9:
+    #         cakes = [
+    #             "Red Velvet Cake", "Dark Forest Cake", "Ice Cream Cake",
+    #             "Plum Cake", "Sponge Cake", "Genoise Cake",
+    #             "Angel Cake", "Carrot Cake", "Fruit Cake"
+    #         ]
+    #         selected = cakes[option - 1]
+    #         users.update_one(
+    #             {"number": number},
+    #             {"$set": {"status": "address", "item": selected}}
+    #         )
+    #         reply = f"Excellent choice 😉\nPlease enter your address to confirm the order for *{selected}*."
+    #     else:
+    #         reply = "Please enter a valid response."
+    # elif user["status"] == "address":
+    #     selected = user.get("item", "Cake")
+    #     orders.insert_one({
+    #         "number": number,
+    #         "item": selected,
+    #         "address": text,
+    #         "order_time": datetime.now()
+    #     })
+    #     users.update_one({"number": number}, {"$set": {"status": "ordered"}})
+    #     reply = (
+    #         f"Thanks for shopping with us 😊\nYour order for *{selected}* "
+    #         "has been received and will be delivered within an hour."
+    #     )
     else:
         reply = (
             "Hi, thanks for contacting again.\nYou can choose from one of the options below:\n\n"
