@@ -29,99 +29,184 @@ def reply():
 
     user = users.find_one({"number": number})
 
-    # Helper function: Main Menu
-    def main_menu():
+    # === Language Menus ===
+    def main_menu_en():
         return (
-            "Hi, thanks for contacting *Cocoa Bake Studio Daska*.\n"
-            "Please follow the instructions *to Place Order* or *for General Information*\n\n"
-            "For *Shop Timing* Press 1️⃣\n"
-            "For *Menu* Press 2️⃣\n"
-            "For *Dream Cake Price* Press 3️⃣\n"
-            "For *Custom Cake Price* Press 4️⃣\n"
-            "For *Bento Cake Price* Press 5️⃣\n"
-            "For *Fire Cake Price* Press 6️⃣\n"
-            "For *Picture Cake Price* Press 7️⃣\n"
-            "For *Home Delivery Details* Press 8️⃣\n"
-            "For *Our Location* Press 9️⃣\n"
-            "To *Contact Our Representative* Press 0️⃣"
+            "Hi, thanks for contacting *Cocoa Bake Studio Daska* 🎂\n"
+            "Please follow the instructions below:\n\n"
+            "1️⃣ Shop Timing\n"
+            "2️⃣ Menu\n"
+            "3️⃣ Dream Cake Price\n"
+            "4️⃣ Custom Cake Price\n"
+            "5️⃣ Bento Cake Price\n"
+            "6️⃣ Fire Cake Price\n"
+            "7️⃣ Picture Cake Price\n"
+            "8️⃣ Home Delivery Details\n"
+            "9️⃣ Our Location\n"
+            "0️⃣ Contact Representative\n\n"
+            "Type *L* to change language 🇵🇰"
         )
 
-    # New user → show main menu
+    def main_menu_ur():
+        return (
+            "السلام علیکم! *Cocoa Bake Studio Daska* میں خوش آمدید 🎂\n"
+            "براہ کرم نیچے دی گئی ہدایات میں سے انتخاب کریں:\n\n"
+            "1️⃣ دکان کے اوقات کار\n"
+            "2️⃣ مینو دیکھیں\n"
+            "3️⃣ ڈریم کیک کی قیمت\n"
+            "4️⃣ کسٹم کیک کی قیمت\n"
+            "5️⃣ بینٹو کیک کی قیمت\n"
+            "6️⃣ فائر کیک کی قیمت\n"
+            "7️⃣ پکچر کیک کی قیمت\n"
+            "8️⃣ ہوم ڈیلیوری کی تفصیل\n"
+            "9️⃣ ہمارا پتہ\n"
+            "0️⃣ نمائندے سے رابطہ کریں\n\n"
+            "زبان تبدیل کرنے کے لیے *L* لکھیں 🇬🇧"
+        )
+
+    # === First interaction ===
     if not user:
-        reply = main_menu()
-        users.insert_one({"number": number, "status": "main", "messages": []})
+        reply = (
+            "Welcome to *Cocoa Bake Studio Daska!* 🎂\n\n"
+            "Please select your language:\n"
+            "🇬🇧 Type *E* for English\n"
+            "🇵🇰 Type *U* for Urdu"
+        )
+        users.insert_one({"number": number, "status": "language", "messages": []})
+
+    # === If user is selecting language ===
+    elif user["status"] == "language":
+        if text.lower() == "e":
+            users.update_one({"number": number}, {"$set": {"status": "main", "language": "en"}})
+            reply = main_menu_en()
+        elif text.lower() == "u":
+            users.update_one({"number": number}, {"$set": {"status": "main", "language": "ur"}})
+            reply = main_menu_ur()
+        else:
+            reply = "Please select a valid option:\n*E* for English 🇬🇧\n*U* for Urdu 🇵🇰"
 
     else:
-        lower_text = text.lower()
+        lang = user.get("language", "en").lower()
 
-        # If user types 'y' → show main menu
-        if lower_text in ["y", "yes"]:
-            reply = main_menu()
-
+        # Language toggle
+        if text.lower() == "l":
+            users.update_one({"number": number}, {"$set": {"status": "language"}})
+            reply = (
+                "Please select your language:\n"
+                "🇬🇧 Type *E* for English\n"
+                "🇵🇰 Type *U* for Urdu"
+            )
+        # Show menu again
+        elif text.lower() in ["y", "yes"]:
+            reply = main_menu_en() if lang == "en" else main_menu_ur()
         else:
-            # Check if it's a number
             try:
                 option = int(text)
             except ValueError:
-                # For any non-numeric input → show Welcome Back message
                 reply = (
-                    "👋 Welcome back to *Cocoa Bake Studio Daska!*\n"
-                    "Please enter a valid number between 0–9 to get information.\n"
+                    "👋 Welcome back!\nPlease enter a valid number between 0–9.\n"
                     "Or type *Y* to see the main menu again."
+                    if lang == "en"
+                    else "👋 خوش آمدید!\nبراہ کرم 0 سے 9 کے درمیان درست نمبر درج کریں۔\n"
+                         "یا مرکزی مینو دیکھنے کے لیے *Y* لکھیں۔"
                 )
                 option = None
 
-            if option == 1:
-                reply = "🕐 Our *Shop Timing* is *1pm to 12am*."
-            elif option == 2:
-                reply = "🍰 Click here to see our *Menu*: https://wa.me/c/923001210019"
-            elif option == 3:
-                reply = "🎂 *Dream Cake Price:*\n1 Pound = 1300\n2 Pounds = 2500\nDelivery 100 for orders under 2000."
-            elif option == 4:
-                reply = (
-                    "🎂 *Custom Cakes* start from 1500/pound.\n"
-                    "Flavors: Chocolate, Double Chocolate, Triple Chocolate, Matilda, Pineapple, Strawberry, Blueberry, Peach, Mango."
-                )
-            elif option == 5:
-                reply = (
-                    "🎁 *Bento Cakes* start from 1200 per cake.\n"
-                    "Flavors: Chocolate, Double Chocolate, Triple Chocolate, Pineapple, Strawberry, Blueberry, Peach, Mango."
-                )
-            elif option == 6:
-                reply = (
-                    "🔥 *Fire Cake Prices:*\n"
-                    "Bento = 1700\n1.5 Pound = 2700\n2 Pound Round = 3400\n2 Pound Heart = 3600\nEatable Picture +800 extra."
-                )
-            elif option == 7:
-                reply = (
-                    "🖼️ *Picture Cake Prices:*\n"
-                    "Bento = 1400\n1.5 Pound = 2400\n2 Pound Round = 3200\n2 Pound Heart = 3300\nEatable Picture +800 extra."
-                )
-            elif option == 8:
-                reply = (
-                    "🚚 *Delivery Charges:*\n"
-                    "Within Daska = 100\nMandranwala / Canal View / Bismillah CNG / Bharokey = 150\n"
-                    "Outside Daska = Rs.50/km (Bike)\nCar Delivery = Rs.200/km"
-                )
-            elif option == 9:
-                reply = (
-                    "📍 *Location:*\nNisbat Road Daska\n\nNearby:\n"
-                    "Govt. High School for Boys\nKashi Pizza Home\nButt Fruit Shop."
-                )
-            elif option == 0:
-                reply = "☎️ Representative available 10am–11pm.\nFor urgent help, call 03001210019."
-            elif option is None:
-                pass
-            else:
-                reply = (
-                    "Please enter a valid number between 0–9.\n"
-                    "Or type *Y* to see the main menu again."
-                )
+            # === English Responses ===
+            if lang == "en":
+                if option == 1:
+                    reply = "🕐 Our *Shop Timing* is *1pm to 12am*."
+                elif option == 2:
+                    reply = "🍰 Click here to see our *Menu*: https://wa.me/c/923001210019"
+                elif option == 3:
+                    reply = "🎂 *Dream Cake Price:*\n1 Pound = 1300\n2 Pounds = 2500\nDelivery 100 for orders under 2000."
+                elif option == 4:
+                    reply = (
+                        "🎂 *Custom Cakes* start from 1500/pound.\n"
+                        "Flavors: Chocolate, Double Chocolate, Triple Chocolate, Matilda, Pineapple, Strawberry, Blueberry, Peach, Mango."
+                    )
+                elif option == 5:
+                    reply = (
+                        "🎁 *Bento Cakes* start from 1200 per cake.\n"
+                        "Flavors: Chocolate, Double Chocolate, Triple Chocolate, Pineapple, Strawberry, Blueberry, Peach, Mango."
+                    )
+                elif option == 6:
+                    reply = (
+                        "🔥 *Fire Cake Prices:*\n"
+                        "Bento = 1700\n1.5 Pound = 2700\n2 Pound Round = 3400\n2 Pound Heart = 3600\nEatable Picture +800 extra."
+                    )
+                elif option == 7:
+                    reply = (
+                        "🖼️ *Picture Cake Prices:*\n"
+                        "Bento = 1400\n1.5 Pound = 2400\n2 Pound Round = 3200\n2 Pound Heart = 3300\nEatable Picture +800 extra."
+                    )
+                elif option == 8:
+                    reply = (
+                        "🚚 *Delivery Charges:*\n"
+                        "Within Daska = 100\nMandranwala / Canal View / Bismillah CNG / Bharokey = 150\n"
+                        "Outside Daska = Rs.50/km (Bike)\nCar Delivery = Rs.200/km"
+                    )
+                elif option == 9:
+                    reply = (
+                        "📍 *Location:*\nNisbat Road Daska\n\nNearby:\n"
+                        "Govt. High School for Boys\nKashi Pizza Home\nButt Fruit Shop."
+                    )
+                elif option == 0:
+                    reply = "☎️ Representative available 10am–11pm.\nFor urgent help, call 03001210019."
+                elif option is None:
+                    pass
+                else:
+                    reply = "Please enter a valid number between 0–9 or type *Y* for main menu."
 
-        # Always keep user status = main
+            # === Urdu Responses ===
+            elif lang == "ur":
+                if option == 1:
+                    reply = "🕐 ہماری دکان کے اوقات کار *1pm سے 12am* تک ہیں۔"
+                elif option == 2:
+                    reply = "🍰 ہمارا *مینو* دیکھنے کے لیے اس لنک پر کلک کریں: https://wa.me/c/923001210019"
+                elif option == 3:
+                    reply = "🎂 *ڈریم کیک کی قیمت:*\n1 پاؤنڈ = 1300\n2 پاؤنڈ = 2500\n2000 سے کم آرڈر پر ڈیلیوری 100 روپے۔"
+                elif option == 4:
+                    reply = (
+                        "🎂 *کسٹم کیک* کی قیمت 1500 روپے فی پاؤنڈ سے شروع۔\n"
+                        "فلیورز: چاکلیٹ، ڈبل چاکلیٹ، ٹرپل چاکلیٹ، میٹیلڈا، پائن ایپل، اسٹرابیری، بلیو بیری، پیچ، آم۔"
+                    )
+                elif option == 5:
+                    reply = (
+                        "🎁 *بینٹو کیک* 1200 روپے فی کیک سے شروع۔\n"
+                        "فلیورز: چاکلیٹ، ڈبل چاکلیٹ، ٹرپل چاکلیٹ، پائن ایپل، اسٹرابیری، بلیو بیری، پیچ، آم۔"
+                    )
+                elif option == 6:
+                    reply = (
+                        "🔥 *فائر کیک کی قیمتیں:*\n"
+                        "بینٹو = 1700\n1.5 پاؤنڈ = 2700\n2 پاؤنڈ گول = 3400\n2 پاؤنڈ دل = 3600\nایٹیبل پکچر +800 اضافی۔"
+                    )
+                elif option == 7:
+                    reply = (
+                        "🖼️ *پکچر کیک کی قیمتیں:*\n"
+                        "بینٹو = 1400\n1.5 پاؤنڈ = 2400\n2 پاؤنڈ گول = 3200\n2 پاؤنڈ دل = 3300\nایٹیبل پکچر +800 اضافی۔"
+                    )
+                elif option == 8:
+                    reply = (
+                        "🚚 *ڈیلیوری چارجز:*\n"
+                        "ڈسکہ کے اندر = 100\nمنڈرانوالہ / کینال ویو / بسم اللہ سی این جی / بھروکی = 150\n"
+                        "ڈسکہ سے باہر = 50 روپے فی کلومیٹر (بائیک)\nکار پر = 200 روپے فی کلومیٹر۔"
+                    )
+                elif option == 9:
+                    reply = (
+                        "📍 *ہمارا پتہ:*\nنس بٹ روڈ ڈسکہ\n\nقریب:\n"
+                        "گورنمنٹ ہائی اسکول برائے طلباء\nکاشی پیزا ہوم\nبٹ فروٹ شاپ۔"
+                    )
+                elif option == 0:
+                    reply = "☎️ نمائندہ 10am سے 11pm تک دستیاب۔\nہنگامی رابطہ: 03001210019"
+                elif option is None:
+                    pass
+                else:
+                    reply = "براہ کرم 0 سے 9 کے درمیان درست نمبر درج کریں یا *Y* لکھیں۔"
+
         users.update_one({"number": number}, {"$set": {"status": "main"}})
 
-    # Log user message
+    # Log messages
     users.update_one(
         {"number": number},
         {"$push": {"messages": {"text": text, "date": datetime.now()}}},
